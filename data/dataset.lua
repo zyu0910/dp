@@ -19,6 +19,18 @@
 local DataSet, parent = torch.class("dp.DataSet", "dp.BaseSet")
 DataSet.isDataSet = true
 
+function DataSet:ioShapes(input_shape, output_shape)
+   if input_shape or output_shape then
+      self._input_shape = input_shape or self._input_shape
+      self._output_shape = output_shape or self._output_shape
+      return
+   end
+   local iShape = self._input_shape or self:inputs() and self:inputs():view()
+   local oShape = self._output_shape or self:targets() and self:targets():view()
+   assert(iShape and oShape, "Missing input or output shape")
+   return iShape, oShape
+end
+
 -- builds a batch (factory method)
 -- reuses the inputs and targets (so don't modify them)
 function DataSet:batch(batch_size)
@@ -34,8 +46,7 @@ function DataSet:sub(batch, start, stop)
       return dp.Batch{
          which_set=self:whichSet(), epoch_size=self:nSample(),
          inputs=self:inputs():sub(start, stop),
-         targets=self:targets() and self:targets():sub(start, stop),
-         carry=self:carry() and self:carry():sub(start, stop)
+         targets=self:targets() and self:targets():sub(start, stop)
       }    
    end
    assert(batch.isBatch, "Expecting dp.Batch at arg 1")
@@ -43,7 +54,6 @@ function DataSet:sub(batch, start, stop)
    if self:targets() then
       self:targets():sub(batch:targets(), start, stop)
    end
-   self:carry():sub(batch:carry(), start, stop)
    return batch  
 end
 
@@ -53,8 +63,7 @@ function DataSet:index(batch, indices)
       return dp.Batch{
          which_set=self:whichSet(), epoch_size=self:nSample(),
          inputs=self:inputs():index(indices),
-         targets=self:targets() and self:targets():index(indices),
-         carry=self:carry() and self:carry():index(indices)
+         targets=self:targets() and self:targets():index(indices)
       }
    end
    assert(batch.isBatch, "Expecting dp.Batch at arg 1")
@@ -62,6 +71,5 @@ function DataSet:index(batch, indices)
    if self:targets() then
       self:targets():index(batch:targets(), indices)
    end
-   self:carry():index(batch:carry(), indices)
    return batch
 end

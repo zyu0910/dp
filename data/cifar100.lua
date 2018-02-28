@@ -100,11 +100,11 @@ function Cifar100:loadTrainValid()
    end
    local size = math.floor(data:size(1)*(1-self._valid_ratio))
    local train_data = data:narrow(1, 1, size)
-   self:setTrainSet(self:createDataSet(train_data, 'train'))
+   self:trainSet(self:createDataSet(train_data, 'train'))
    local start = size + 1
    local size = data:size(1)-start
    local valid_data = data:narrow(1, start, size)
-   self:setValidSet(self:createDataSet(valid_data, 'valid'))
+   self:validSet(self:createDataSet(valid_data, 'valid'))
 end
 
 function Cifar100:loadTest()
@@ -113,11 +113,11 @@ function Cifar100:loadTest()
       print"shuffling test set"
       test_data = test_data:index(1, torch.randperm(test_data:size(1)):long())
    end
-   self:setTestSet(self:createDataSet(test_data, 'test'))
+   self:testSet(self:createDataSet(test_data, 'test'))
 end
 
 function Cifar100:createDataSet(data, which_set)
-   local inputs = data:narrow(2, 3, self._feature_size):clone():double()
+   local inputs = data:narrow(2, 3, self._feature_size):clone():float()
    inputs:resize(inputs:size(1), unpack(self._image_size))
    if self._scale then
       parent.rescale(inputs, self._scale[1], self._scale[2])
@@ -142,7 +142,9 @@ function Cifar100:createDataSet(data, which_set)
    self._coarse_targets:setClasses(self._classes)
    self._fine_targets:setClasses(self._classes)
    -- construct dataset
-   return dp.DataSet{inputs=input_v,targets=self._fine_targets,which_set=which_set}
+   local ds = dp.DataSet{inputs=input_v,targets=self._fine_targets,which_set=which_set}
+   ds:ioShapes('bchw', 'b')
+   return ds
 end
 
 --Returns a 10,000 or 50,000 x 3074 tensor, 
@@ -178,7 +180,7 @@ local function cifar100test(num_images)
       img = dt:image():select(1,idx):transpose(1,3)
       image.savePNG('cifar100feature'..idx..'.png', img)
    end
-   c:setInputPreprocess(dp.GCN())
+   c:inputPreprocess(dp.GCN())
    c:preprocess()
    for idx = 1,num_images do
       img = dt:image():select(1,idx):transpose(1,3)

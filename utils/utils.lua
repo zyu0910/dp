@@ -36,10 +36,10 @@ end
 -- Temporarily changes the current working directory to call fn, 
 -- returning its result.
 function dp.do_with_cwd(path, fn)
-   local cur_dir = fs.cwd()
-   fs.chdir(path)
+   local cur_dir = lfs.currentdir()
+   lfs.chdir(path)
    local res = fn()
-   fs.chdir(cur_dir)
+   lfs.chdir(cur_dir)
    return res
 end
 
@@ -47,8 +47,10 @@ end
 -- If file doesn't exists at path, downloads it from url into path 
 function dp.check_and_download_file(path, url)
    if not paths.filep(path) then
+      local dirPath = paths.dirname(path)
+      dp.mkdir(dirPath)
       dp.do_with_cwd(
-         paths.dirname(path), 
+         dirPath, 
          function() dp.download_file(url) end
       )
    end
@@ -223,6 +225,11 @@ function dp.images2tensor(inputs, targets, paths, shuffle, verbose)
       end
    end
    return inputs, targets
+end
+
+function dp.reload(mod, ...)
+    package.loaded[mod] = nil
+    return require(mod, ...)
 end
 
 ------------------------ Queue -----------------------------

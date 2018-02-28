@@ -30,23 +30,24 @@ Post-initialization method for mediation and such:
   * `propagator` is the [Propagator](propagator.md#dp.Propagator) which this object extends.
   * `dataset` is a [DataSet](data.md#dp.DataSet). This might be useful to determine the type of targets. Feedback should not hold a reference to the dataset due to it's possible serialization.
 
-### add(batch, output, carry, report) ###
-The main method of the object. It is called for every `batch` propagated through the [Model](model.md#dp.Model).
+### add(batch, output, report) ###
+The main method of the object. It is called for every `batch` propagated through the `model`.
 
   * `batch` is the current [Batch](data.md#dp.Batch) being propagated by the subject Propagator.
-  * `output` is the forward propagated output [View](view.md#dp.View) of the model.
-  * `carry` is the propagated table of meta-data. It can be modified to pass on information to Models during the backward pass;
-  *`report` is a table of statistics and meta-data returned by the [Experiment:report](experiment.md#dp.Experiment.report) method during the last epoch;
+  * `output` is the forward propagated output Tensor of the model.
+  * `report` is a table of statistics and meta-data returned by the [Experiment:report](experiment.md#dp.Experiment.report) method during the last epoch;
 
 <a name="dp.Confusion"/>
 []()
 ## Confusion ##
-Confusion is a wrapper for the [ConfusionMatrix](https://github.com/torch/optim/blob/master/ConfusionMatrix.lua) found in the [optim](https://github.com/torch/optim/blob/master/README.md) package.
+Confusion is a wrapper for the [ConfusionMatrix](https://github.com/torch/optim/blob/master/ConfusionMatrix.lua) 
+found in the [optim](https://github.com/torch/optim/blob/master/README.md) package.
 
 <a name="dp.Perplexity"/>
 []()
 ## Perplexity ##
-Computes perplexity for language models. For now, only works with the SoftmaxTree Model.
+Computes perplexity for language models. 
+Works for neural network language models and recurrent language models.
 
 <a name="dp.TopCrop"></a>
 ## TopCrop ##
